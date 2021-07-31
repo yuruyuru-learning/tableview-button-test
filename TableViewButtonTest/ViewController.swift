@@ -11,6 +11,8 @@ class ViewController: UIViewController , UITableViewDelegate, UITableViewDataSou
     
     let items = ["test", "yuruyuru", "aaa"]
     
+    let saveData = UserDefaults.standard
+    
     @IBOutlet var table: UITableView!
 
     override func viewDidLoad() {
@@ -26,9 +28,31 @@ class ViewController: UIViewController , UITableViewDelegate, UITableViewDataSou
         cell?.textLabel?.frame = CGRect(x: 0, y: 0, width: tableView.frame.width * 0.8, height: (cell?.frame.height)!)
         cell?.textLabel?.text = items[indexPath.row]
         
+        for v in cell!.subviews {
+            if let v = v as? UIButton {
+                v.removeFromSuperview()
+            }
+        }
+        
         let button = UIButton()
         button.frame = CGRect(x: tableView.frame.width * 0.8, y: 0, width: tableView.frame.width * 0.2, height: (cell?.frame.height)!)
-        button.setTitle("X", for: .normal)
+        
+        var count = 0
+        
+        if saveData.integer(forKey: items[indexPath.row]) != nil {
+            count = saveData.integer(forKey: items[indexPath.row])
+        } else {
+            saveData.setValue(count, forKey: items[indexPath.row])
+        }
+        
+        if count % 2 == 0 {
+            button.setTitle("X", for: .normal)
+        } else {
+            button.setTitle("O", for: .normal)
+        }
+        
+        button.tag = indexPath.row
+        
         button.setTitleColor(.black, for: .normal)
         button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
         cell?.addSubview(button)
@@ -37,7 +61,9 @@ class ViewController: UIViewController , UITableViewDelegate, UITableViewDataSou
     }
     
     @objc func buttonTapped(_ sender: UIButton) {
-        sender.setTitle("O", for: .normal)
+        let count = saveData.integer(forKey: items[sender.tag])
+        saveData.setValue(count + 1, forKey: items[sender.tag])
+        self.table.reloadData()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
